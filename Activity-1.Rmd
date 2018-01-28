@@ -1,0 +1,38 @@
+---
+title: "Activity1"
+author: "Canyon Foot"
+date: "1/27/2018"
+output: html_document
+---
+
+Fruit
+
+Data:
+  Each row is a different fruit, with two columns, Tastiness and Difficulty.
+  
+Critique:
+ 	I like this chart. It is very casual, as indicated by the hand drawn appearance of the fruit, and the subjective nature of the data. In general, this visualization conveys its point very effectively and is easy to interpret. 
+  
+Piano 
+
+Data:
+  Each row is a piece listed with its composer and the key it is written in.
+  
+Critique:
+ 	The appearance of the chart is somewhat busy at first glance, and it can be hard to get a precise sense of each composer’s breakdown because most keys are not labeled with a percentage. However, once you get used to the layout, it does provide an intuitive way to visualize how different composers differ in their use of the various keys. I think this chart is better for someone with limited musical knowledge.
+
+100 People
+
+Data:
+	The data was likely taken from world population statistics and turned into 100 individual people, rather than a dataset that listed 100 people. The data needs to have basic information like language, religion, income, etc.
+
+Critique:
+	At first, the chart is confusing because it resembles a pie/donut chart but is closer to a set of rectangular charts arranged in a circle. Once you get this, it is very easy to read and interpret, however, the depth of analysis possible is very limited. Because the data is represented as a bunch of unrelated charts that breakdown population level statistics, it is impossible to get any sense of how the variables are related to each other, with would much more interesting than what we get. 
+
+Deaths
+
+Data:
+	Each row is a death with a cause and a date.
+
+Critique:
+	This chart is very old, so it predates much of modern convention. However, judging by these modern criteria, there are some issues. First of all, the use of area to represent deaths makes it difficult to estimate the underlying numbers, and may be inflating the deaths from preventable disease. There are also consistency issues with how the data is presented, with some months using a different order than others. The lack of numerical references adds to the uncertainty, and it’s not clear how the two years compare. Still, this chart definitely gets its point across, and is an impressive accomplishment for the era. 
