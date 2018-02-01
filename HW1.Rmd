@@ -2,7 +2,7 @@
 title: "HW1"
 author: "Canyon Foot"
 date: "2/1/2018"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
