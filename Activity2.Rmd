@@ -1,0 +1,23 @@
+---
+title: "Activity 2"
+author: "Canyon Foot"
+date: "2/1/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+data("CO2")
+```
+
+```{r}
+head(CO2)
+
+ggplot(CO2, aes(x = conc, y = uptake, col = Plant))+
+  geom_point(aes(size = Type)) + geom_line()
+```
+ 
+ 
+ 
+ 
