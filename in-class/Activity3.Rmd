@@ -1,0 +1,88 @@
+---
+title: "Activity-3"
+author: "Canyon Foot"
+date: "2/6/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(babynames)
+data("babynames")
+
+```
+The least popular popular names are shown in the table below.
+```{r}
+babynames %>%
+  mutate(is_popular = prop > .01) %>%
+  filter(is_popular == TRUE) %>%
+  arrange(prop)
+```
+Bella was most common in the late 2000s and early 2010s. I wonder if there was a popular series of books and movies featuring a main character named "Bella" that was released during this period...
+
+The class of Bella is "tbl_df"
+```{r}
+bella <- babynames %>% filter(name == "Bella" & sex == "F") %>% select(year,sex,name,n)
+ggplot(bella, aes(x = year, y = n)) + geom_line()
+
+class(bella)
+
+bella %>% arrange(desc(n))
+```
+My name was most popular in 2003, with n = 158. The most popular name that year was Jacob.
+```{r}
+
+babynames %>% filter(name == "Canyon" & sex == "M") %>% arrange(desc(n))
+babynames %>% filter(year == 2003) %>% arrange(desc(n))
+
+babynames %>% filter(name == "Canyon" & sex == "M") %>% arrange(desc(n)) %>% ggplot(aes(x = year, y = n)) + geom_line()
+```
+1957 had the highest number of Births.
+```{r}
+bab <- babynames %>% group_by(year) %>% summarise(count = sum(n))
+bab %>% arrange(desc(count))
+
+babynames %>% group_by(name) %>% summarise(early = min(year), late = max(year))
+```
+I does appear that recently there was a fairly sharp increase in the number of distinct names. This effect seems somewhat stronger for female names.
+```{r}
+babynames %>% group_by(year, sex) %>% mutate(num_names = n_distinct(name)) %>% 
+  ggplot(aes(x = year, y = num_names, color = sex)) + geom_line()
+
+```
+The most popular names of the 1990s were Andrew, Ashley, CHristopher, Daniel, Jacob, Jessica, Joshua, Matthew, Michael, and Nicholas.
+```{r}
+babynames %>% filter(year >= 1990, year < 2000, prop > .0005) %>% group_by(name) %>% mutate(total_prop = sum(prop)) %>% filter(total_prop > .13) %>%
+  ggplot(aes(x = year, y = n, color = name, linetype = sex)) + geom_line()
+```
+
+```{r}
+Men_of_The_Bible <- c("Aaron", "Abel", "Abraham", "Adam", "Andrew", "Asher","Barak","Barnabas","Bartholomew","Benjamin","Daniel","Elijah","Elon","Ephraim",
+"Ezekiel","Gabriel","Gad","Gideon","Hillel","Hiram","Immanuel","Isaac","Ishmael",
+"Israel","Jabin","Jacob","James","Jared","Jesse","Jesus","Jethro","Joel","John","Jokim","Joseph","Joshua","Josiah","Judah","Levi","Lucas","Luke","Mark","Matthew","Meshach","Micah","Moses","Noah","Paul","Peter","Philip","Reuben","Rufus","Samson","Saul","Seth","Silas","Simon","Solomon","Stephen","Thaddeus","Thomas","Timothy", "Zacharias")
+
+Women_of_the_Bible <- c("Abigail", "Ada", "Ahlai", "Angel", "Anna", "Apphia", "Atarah", "Athaliah", "Bathsheba", "Bilhah", "Candace", "Chloe", "Claudia", "Damaris", "Deborah", "Delilah", "Diana", "Dinah", "Elizabeth", "Esther", "Eunice", "Eve", "Hagar", "Hannah", "Huldah", "Jedidah", "Jezebel", "Joanna", "Judith", "Julia", "Leah", "Lois", "Lydia", "Martha", "Mary", "Michaiah", "Milcah", "Miriam", "Naarah", "Naomi", "Orpah", "Phebe", "Priscilla", "Rachel", "Rebecca", "Ruth", "Salome", "Sapphira", "Sarai", "Sherah", "Susanna", "Tabitha", "Tamar", "Tirza", "Vashti", "Zilpah")
+
+# To view the popularity of Biblical names I created two vectors, "Women_of_the_Bible" and "Men_of_the_Bible" that each contain ~50 of the most common Biblical names, then filtered for names included in these vectors. 
+babynames %>%
+  filter((sex == "M" & name %in% Men_of_The_Bible) | (sex == "F" & name %in% Women_of_the_Bible)) %>%
+  group_by(year, sex) %>% 
+  mutate(total_prop = sum(prop)) %>%
+  ggplot(aes(x = year, y = total_prop, color = sex)) + geom_line() + labs(x = "Year", y = "Total Proportion of Biblical Names", title  = "Use Of Biblical Names Over Time")
+
+
+# Tracking Pppular Biblical names over time. I used "sum(prop) > .007 * 135" to find the names with the highest average proportion over the 135 years of the data. Note that this may exclude popular biblical names that were only popular for a short period of time.
+
+babynames %>% group_by(name) %>%
+  filter((sex == "M" & name %in% Men_of_The_Bible) & sum(prop) > .007 * 135 | (sex == "F" & name %in% Women_of_the_Bible & sum(prop) > .007 * 135)) %>%
+  group_by(year) %>% 
+  ggplot(aes(x = year, y = prop, color = name)) + geom_line() + labs(x = "Year", y = "Proportion", title  = "10 Most Popular Biblical Names Over Time")
+```
+
+
+
+
+
+
+
