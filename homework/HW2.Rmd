@@ -29,11 +29,16 @@ data("planes")
 
 ```{r}
 presidential_names <- c("Grover","Benjamin","Grover","William","Theodore","William","Woodrow","Warren","Calvin","Herbert","Franklin","Harry","Dwight","John","Lyndon","Richard","Gerald","James","Ronald","George","William", "Barack")
-baby_pres <- babynames %>% group_by(year) %>% full_join(Pres) 
-baby_pres <- baby_pres %>% full_join(Pres_list) %>%
-  mutate(ContemporaryPresTF = (name == president | name == prev_pres | name == next_pres), OverallPresTF = name %in%  c(presidential_names)) %>% filter(sex == "M")
+baby_pres <- babynames %>% 
+  group_by(year) %>% 
+  full_join(Pres) 
+baby_pres <- baby_pres %>% 
+  full_join(Pres_list) %>%
+  mutate(ContemporaryPresTF = (name == president | name == prev_pres | name == next_pres), OverallPresTF = name %in%  c(presidential_names)) %>% 
+  filter(sex == "M")
 
-baby_pres <-baby_pres %>% filter(year > 1880, ContemporaryPresTF == TRUE & OverallPresTF == TRUE)
+baby_pres <-baby_pres %>% 
+  filter(year > 1880, ContemporaryPresTF == TRUE & OverallPresTF == TRUE)
 
 #This code combines my data into one data set and filters for names of presidents. 
 # It then filters for names that were the name of the current president, the previous
@@ -43,20 +48,26 @@ baby_pres <-baby_pres %>% filter(year > 1880, ContemporaryPresTF == TRUE & Overa
 ```
 
 ```{r, fig.width= 12}
-plot_1960 <-baby_pres %>% filter(prop < .0075 & year < 1960) %>% 
+plot_1960 <-baby_pres %>% 
+  filter(prop < .0075 & year < 1960) %>% 
   ggplot(aes(x = year, y = prop, color = name)) + geom_line(size = 2) + labs(x = "Year", y = "Name Proportion", title = "Presidential Name Popularity 1882 - 1960                                   Black Bars Indicate End of a Presidency") +
   #making first line plot
   annotate("linerange", x = c(1884, 1888, 1892, 1900, 1912, 1920, 1923, 1928, 1932,  1945, 1952), ymin = 0, ymax = .0008) +
   
-  annotate("text", x = c(1886, 1894, 1905, 1905, 1916, 1926, 1935, 1939,1950, 1955), y = c(.0023, .005, .0035, .001, .006, .0015, .0067, .0015,.0035, .0008), label = c("Grover", "Benjamin", "Theodore", "Woodrow", "Warren", "Calvin", "Herbert", "Franklin", "Harry", "Dwight"), size = 6) + annotate("text", x = 1956, y = .007, label = "Note: William Taft and \n William Mikinley excluded \n for scale reasons") +  theme(plot.title = element_text(size=22))
+  annotate("text", x = c(1886, 1894, 1905, 1905, 1916, 1926, 1935, 1939,1950, 1955), y = c(.0023, .005, .0035, .001, .006, .0015, .0067, .0015,.0035, .0008), label = c("Grover", "Benjamin", "Theodore", "Woodrow", "Warren", "Calvin", "Herbert", "Franklin", "Harry", "Dwight"), size = 6) +
+  annotate("text", x = 1956, y = .007, label = "Note: William Taft and \n William Mikinley excluded \n for scale reasons") +  theme(plot.title = element_text(size=22))
 # annotating for presidental change and adding names
-plot_2015 <- baby_pres %>% filter(year >= 1960, name != "Dwight" & name != "Theodore" & name != "Harry" & name != "Benjamin" & (name != "Ronald" | year < 1992)) %>% 
+plot_2015 <- baby_pres %>%
+  filter(year >= 1960, name != "Dwight" & name != "Theodore" & name != "Harry" & name != "Benjamin" & (name != "Ronald" | year < 1992)) %>% 
   
-ggplot(aes(x = year, y = prop, color = name)) + geom_line(size = 2) + labs(x = "Year", y = "Name Proportion", title = "Presidential Name Popularity 1960 - 2015") +
+ggplot(aes(x = year, y = prop, color = name)) +
+  geom_line(size = 2) +
+  labs(x = "Year", y = "Name Proportion", title = "Presidential Name Popularity 1960 - 2015") +
    #making second line plot
   annotate("linerange", x = c(1960, 1963, 1968, 1974, 1976, 1980, 1988, 1992,2000,2008), ymin = 0, ymax = .0045) +
   
   annotate("text", x = c(1964, 1968, 1985, 1998), y = c(.035, .015, .022, .007), label = c("John", "Richard", "James", "William"), size = 6)  +
+  
   annotate("text", x= c(1968, 1978, 1985, 2000, 2010), y = -.001, label = c("Lyndon", "Gerald", "Ronald", "George", "Barack"), size = 6) + theme(plot.title = element_text(size=22))
 # annotating for presidental change and adding names
 ```
@@ -80,23 +91,32 @@ Book Exercises:
 4.2
 January had the highest proportion of cancelled flights, October had the lowest. This makes intuitive sense as the fall tends to have less severe weather than the winter.
 ```{r}
-flights %>% group_by(month) %>% mutate(cancelled = if_else(is.na(air_time),1,0)) %>% summarise(cancelled_rate = sum(cancelled)/n()) %>% arrange(desc(cancelled_rate))
+flights %>% group_by(month) %>% 
+  mutate(cancelled = if_else(is.na(air_time),1,0)) %>%
+  summarise(cancelled_rate = sum(cancelled)/n()) %>%
+  arrange(desc(cancelled_rate))
 ```
 
 
 4.3
 The plane with tail number N223AG flew the most flights from the pnw.
 ```{r}
-flights %>% group_by(tailnum) %>% summarise(total = n()) %>% arrange(desc(total))
+flights %>% group_by(tailnum) %>% 
+  summarise(total = n()) %>% 
+  arrange(desc(total))
 
-flights %>% filter(tailnum == "N223AG") %>% group_by(month) %>% summarise(total = n()) %>% ggplot(aes(x= month, y = total)) + geom_line()
+flights %>% filter(tailnum == "N223AG") %>% 
+  group_by(month) %>% summarise(total = n()) %>% 
+  ggplot(aes(x= month, y = total)) + geom_line()
 ```
 
 4.4
 The oldest plane has tailnum "N201AA". There is a total of 2628 planes listed in the planes table.
 ```{r}
 
-planes %>% filter(year > 0) %>% full_join(flights, "tailnum")  %>% arrange(year.x)
+planes %>% filter(year > 0) %>% 
+  full_join(flights, "tailnum")  %>%
+  arrange(year.x)
 ```
 
 4.5
@@ -108,10 +128,14 @@ planes %>% filter(year == 0 | is.na(year))
 # planes without year
 planes %>% group_by(manufacturer) %>% summarise(total=n_distinct(tailnum)) %>% arrange(desc(total))
 
-planes %>% filter(year > 1960, !is.na(manufacturer)) %>% group_by(manufacturer, year) %>% summarise(total=n_distinct(tailnum)) %>% 
+planes %>% filter(year > 1960, !is.na(manufacturer)) %>% 
+  group_by(manufacturer, year) %>% 
+  summarise(total=n_distinct(tailnum)) %>% 
   mutate(manufacturer2 = if_else(!(manufacturer %in% c("AIRBUS", "AIRBUS INDUSTRIE", "BOEING", "BOMBARDIER INC", "MCDONNELL DOUGLAS")), "Other", manufacturer)) %>%
+  
   # creating other catagory
-  ggplot(aes(x = year, y = total, color = manufacturer2)) + geom_line()
+  ggplot(aes(x = year, y = total, color = manufacturer2)) +
+  geom_line()
 
 
 ```
@@ -120,12 +144,18 @@ The temperature distribution is centered around 65 degrees, and is right skewed.
 
 The relationship between dew point and humidity is positive and fairly weak, the relationship between visibility and precipitation is negative and moderate.
 ```{r}
-weather %>% filter(month == 7) %>% ggplot(aes(x = temp)) + geom_histogram(binwidth = 5)
+weather %>% filter(month == 7) %>% 
+  ggplot(aes(x = temp)) + geom_histogram(binwidth = 5)
 # histogram
-weather %>% filter(month == 7) %>% ggplot(aes(x = dewp, y = humid)) + geom_jitter() +
+weather %>% filter(month == 7) %>% 
+  ggplot(aes(x = dewp, y = humid)) + 
+  geom_jitter() +
   geom_smooth(se = FALSE, method = "lm")
 
-weather %>% filter(month == 7, precip< .10) %>% ggplot(aes(x = precip, y = visib)) + geom_jitter() + geom_smooth(se = FALSE, method = "lm")
+weather %>% filter(month == 7, precip< .10) %>% 
+  ggplot(aes(x = precip, y = visib)) + 
+  geom_jitter() + 
+  geom_smooth(se = FALSE, method = "lm")
 # scatterplots
 ```
 
