@@ -53,7 +53,7 @@ Prior to the 1960s, there was usually a strong spike in the popularity of the pr
 grid.arrange(plot_1960, plot_2015, nrow = 2)
 ```
 
-![](HW_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](HW2_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 ``` r
 # combining plots into one image
@@ -114,7 +114,7 @@ flights %>% group_by(tailnum) %>% summarise(total = n()) %>% arrange(desc(total)
 flights %>% filter(tailnum == "N223AG") %>% group_by(month) %>% summarise(total = n()) %>% ggplot(aes(x= month, y = total)) + geom_line()
 ```
 
-![](HW_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](HW2_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 4.4 The oldest plane has tailnum "N201AA". There is a total of 2628 planes listed in the planes table.
 
@@ -199,7 +199,7 @@ planes %>% filter(year > 1960, !is.na(manufacturer)) %>% group_by(manufacturer, 
   ggplot(aes(x = year, y = total, color = manufacturer2)) + geom_line()
 ```
 
-![](HW_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](HW2_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 The temperature distribution is centered around 65 degrees, and is right skewed.
 
@@ -209,7 +209,7 @@ The relationship between dew point and humidity is positive and fairly weak, the
 weather %>% filter(month == 7) %>% ggplot(aes(x = temp)) + geom_histogram(binwidth = 5)
 ```
 
-![](HW_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](HW2_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 ``` r
 # histogram
@@ -217,13 +217,13 @@ weather %>% filter(month == 7) %>% ggplot(aes(x = dewp, y = humid)) + geom_jitte
   geom_smooth(se = FALSE, method = "lm")
 ```
 
-![](HW_files/figure-markdown_github/unnamed-chunk-8-2.png)
+![](HW2_files/figure-markdown_github/unnamed-chunk-8-2.png)
 
 ``` r
 weather %>% filter(month == 7, precip< .10) %>% ggplot(aes(x = precip, y = visib)) + geom_jitter() + geom_smooth(se = FALSE, method = "lm")
 ```
 
-![](HW_files/figure-markdown_github/unnamed-chunk-8-3.png)
+![](HW2_files/figure-markdown_github/unnamed-chunk-8-3.png)
 
 ``` r
 # scatterplots
