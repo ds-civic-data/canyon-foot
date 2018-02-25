@@ -1,0 +1,39 @@
+---
+title: "Activity4"
+author: "Canyon Foot"
+date: "2/20/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(pnwflights14)
+data("pnwflights14")
+data("flights")
+```
+
+```{r}
+pop_carrier <- function(carr) {
+  flights %>% 
+    filter(carrier == carr) %>%
+    group_by(dest) %>%
+    summarise(total = n()) %>%
+    arrange(desc(total)) %>%
+    head(5)
+}
+
+pop_carrier("WN")
+
+pop_airport <- function(port) {
+  flights %>% 
+    filter(dest == port) %>%
+    group_by(carrier) %>%
+    summarise(total = n(), avg_delay = mean(arr_delay, na.rm = TRUE)) %>%
+    arrange(desc(total)) %>%
+    head(5)
+}
+
+pop_airport("LAX")
+
+```
