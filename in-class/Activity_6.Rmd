@@ -1,0 +1,59 @@
+---
+title: "Activity"
+author: "Canyon Foot"
+date: "3/6/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+voters <- read_csv("~/canyon-foot/homework/voter_sample.csv")
+```
+
+```{r}
+voters <- voters %>% 
+  filter(!is.na(VOTER_ID)) %>% 
+  gather(10:34, key = VOTE_DATE, value = VOTED) %>%
+  filter(!is.na(VOTED)) %>%
+  group_by(VOTER_ID) %>%
+  mutate(VOTE_PROP = sum(VOTED =="YES")/(sum(VOTED == "NO")+ sum(VOTED == "YES") )) %>%
+  select(-VOTED, -VOTE_DATE) %>%
+  distinct()
+  
+```
+
+```{r}
+voters %>%
+  summarise(n_distinct(VOTER_ID))
+```
+Democrats and republicans have very similar turnout rates, 57.7% and 57.4% respectively. These are the highest of any of the parties.
+```{r}
+voters %>% 
+  group_by(PARTY_CODE) %>%
+  summarise(mean(VOTE_PROP, na.rm = TRUE))
+```
+All parties seem to follow the same non-linear relationship with peaks around 80 years old, and a decline after that. I used the average because all those points were overwheleming 
+```{r}
+voters %>% 
+  mutate(AGE = 2016 - as.numeric(substr(BIRTH_DATE, 7, 11))) %>%
+  filter(PARTY_CODE %in% c("REP", "DEM", "IND", "NAV"), AGE < 100) %>%
+  group_by(PARTY_CODE, AGE) %>%
+  summarise(AVG = mean(VOTE_PROP)) %>%
+  ggplot(aes(x = AGE, y = AVG, col = PARTY_CODE)) + 
+  geom_jitter() +
+  geom_smooth(se = FALSE)
+```
+The tables below show that motor voters are less likely to vote, and vastly more likely to be NAVs.
+```{r}
+voters %>% 
+  group_by(motor_voter) %>%
+  summarise(mean(VOTE_PROP))
+
+voters1 <- voters %>% 
+  filter(PARTY_CODE %in% c("REP", "DEM", "IND", "NAV"))
+  prop.table(table(voters1$PARTY_CODE, voters1$motor_voter), margin=2)
+```
+
+
+
