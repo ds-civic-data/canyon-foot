@@ -1,0 +1,184 @@
+---
+title: "HW6"
+author: "Canyon Foot"
+date: "3/24/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+voter_sample <- read_csv("http://bit.ly/2oOdqlV")
+
+```
+```{r}
+# Calculating voting rate for my model
+voter_rate <- voter_sample %>% 
+  gather(`08/15/2016`:`05/16/2006`, key = VOTE_DATE, value = VOTED) %>% 
+  group_by(VOTER_ID) %>% 
+  filter(VOTED %in% c("YES", "NO")) %>%
+  mutate(VOTE_PROP =sum(VOTED =="YES")/(sum(VOTED == "NO") + sum(VOTED == "YES"))) %>%   select(-VOTED, -VOTE_DATE) %>%
+  distinct() %>%
+  select(VOTER_ID, VOTE_PROP) 
+# Adding a few columns, removing others 
+voter_2016_election <- voter_sample %>%  
+  mutate(voted = if_else(`11/08/2016` == "YES", 1, 0), age = 2016- as.numeric(substring(BIRTH_DATE,7,11))) %>% 
+  select(-(`08/15/2016`:`05/16/2006`)) %>%
+  filter(age < 110, !is.na(voted), PARTY_CODE != "AME") %>%
+  select(-c(BIRTH_DATE, PRECINCT, CONFIDENTIAL, ZIP_CODE, `11/08/2016`)) %>%
+  mutate(Major_party = PARTY_CODE %in% c("DEM","REP"))
+# Joining, cleaning
+voter_2016 <- full_join(voter_rate, voter_2016_election, by = "VOTER_ID") %>%
+  ungroup() %>%
+  filter(!is.na(COUNTY)) %>%
+  mutate(VOTE_PROP = if_else(is.na(VOTE_PROP), 0, VOTE_PROP)) %>%
+  distinct()
+  
+  
+```
+
+```{r}
+# Training/testing dfs
+set.seed(4723)
+train_indices <- sample(1:nrow(voter_2016), size = 50000, replace = FALSE)
+voter_train <- slice(voter_2016, train_indices)
+voter_test  <- slice(voter_2016, -train_indices)
+```
+
+```{r}
+# Models
+m1 <- glm(voted ~ motor_voter, data = voter_train, family = binomial)
+
+
+m2 <- glm(voted ~ motor_voter + age, data = voter_train, family = binomial)
+
+
+m3 <- glm(voted ~ motor_voter + age + I(age^2), data = voter_train, family = binomial)
+
+
+m4 <- glm(voted ~ motor_voter + age + I(age^2) + PARTY_CODE, data = voter_train, family = binomial)
+
+m5 <- glm(voted ~ motor_voter + I(age^3) + PARTY_CODE + Major_party + VOTE_PROP, data = voter_train, family = binomial)
+
+```
+
+```{r}
+# Models m1-m5 prediction, confusion matricies, mcr
+m1_pred <- predict(m1, newdata = voter_test, type = "response")
+m1_test <- voter_test %>%
+  mutate(p_hat        = m1_pred,
+         pred_voted = round(p_hat))
+
+m1_confusion_mat <- m1_test %>%
+  group_by(voted, pred_voted) %>%
+  tally()
+
+m1_mcr <- (m1_confusion_mat[2, 3] + m1_confusion_mat[3, 3])/nrow(m1_test)
+  
+```
+```{r}
+m2_pred <- predict(m2, newdata = voter_test, type = "response")
+m2_test <- voter_test %>%
+  mutate(p_hat        = m2_pred,
+         pred_voted = round(p_hat))
+
+m2_confusion_mat <- m2_test %>%
+  group_by(voted, pred_voted) %>%
+  tally()
+
+m2_mcr <- (m2_confusion_mat[2, 3] + m2_confusion_mat[3, 3])/nrow(m2_test)
+```
+```{r}
+m3_pred <- predict(m3, newdata = voter_test, type = "response")
+m3_test <- voter_test %>%
+  mutate(p_hat        = m3_pred,
+         pred_voted = round(p_hat))
+
+m3_confusion_mat <- m3_test %>%
+  group_by(voted, pred_voted) %>%
+  tally()
+
+m3_mcr <- (m3_confusion_mat[2, 3] + m3_confusion_mat[3, 3])/nrow(m3_test)
+```
+```{r}
+m4_pred <- predict(m4, newdata = voter_test, type = "response")
+m4_test <- voter_test %>%
+  mutate(p_hat        = m4_pred,
+         pred_voted = round(p_hat))
+
+m4_confusion_mat <- m4_test %>%
+  group_by(voted, pred_voted) %>%
+  tally()
+
+m4_mcr <- (m4_confusion_mat[2, 3] + m4_confusion_mat[3, 3])/nrow(m4_test)
+```
+
+```{r}
+m5_pred <- predict(m5, newdata = voter_test, type = "response")
+m5_test <- voter_test %>%
+  mutate(p_hat        = m5_pred,
+         pred_voted = round(p_hat))
+
+m5_confusion_mat <- m5_test %>%
+  group_by(voted, pred_voted) %>%
+  tally()
+
+m5_mcr <- (m5_confusion_mat[2, 3] + m5_confusion_mat[3, 3])/nrow(m5_test)
+```
+Table of misclassification rates, in order 1-5.
+```{r}
+c(m1_mcr, m2_mcr, m3_mcr, m4_mcr, m5_mcr)
+```
+1) 
+	Despite our previous work that showed a fairly strong relationship between age and voting, these models do not seem to be capturing it. The coefficient for age in model 2 is .035, nearly 0, and the addition of age does almost nothing to increase the accuracy of the model.
+
+2) 
+	The models are very similar. The first 4 are between 17.9% and 18.6. My model fares slightly better with an mcr of 16.8%. The most effective additions I made were a historical voting proportion variable and a cubic age term. I also tried county per capita income, but this had little effect.
+
+3) 
+	Given the fact that none of these models perform much better than the basic vote ~ motor_voter, I do not feel that we have effectively understood the relationship. If we had more reliable data for previous elections, or more specific demographic data, it might be easier to pin down the predictors more precisely.
+
+4)  
+	Unfortunately, for the reasons outlined above, our models do not provide much insight into these questions. However, the tables and chart below provide some answers. The first box plot shows very clearly that young registered voters were less likely to vote in the 2016 election. The mean for non-voters is around 40, while the mean for voters is roughly 52. Interestingly, the numbers for mean age of motor voters and non-motor voters are very similar, to the numbers for non-voters and voters, 38 and 50, respectively. Looking at the next table, you can see that motor voters were much less likely to vote than non-motor voters, which could be due in part to the age difference mentioned earlier, but also likely results from the fact that motor voters did not choose to be registered, and thus may on average be less interested in participating in elections. Party seems to have a similar effect. Those registered as Democrats and Republicans are much more likely to vote than those who are not affiliated, as seen in the final table. This can be partially accounted for by the fact that motor voters default to NAV, and the omv population is less likely to vote. It is also probably the case that NAVs are not affiliated because they do not have close ties to either party, and thus would be less enthusiastic about voting in elections that boil down to contests between Democrats and Republicans. NAV status could also indicate general voting apathy, which would likewise contribute to their lower rates of participation.
+
+```{r}
+ggplot(voter_2016, aes(x = as.factor(voted), y = age)) + geom_boxplot()
+
+omv <- voter_2016 %>% 
+  filter(motor_voter == TRUE) %>%
+  summarise(omv_mean_age = mean(age))
+nomv <- voter_2016 %>% 
+  filter(motor_voter == FALSE) %>%
+  summarise(non_omv_mean_age = mean(age))
+
+c(omv, nomv)
+
+voter_2016 %>% 
+  group_by(motor_voter, voted) %>%
+  tally()
+
+voter_2016 %>%
+  filter(PARTY_CODE %in% c("DEM", "REP", "NAV")) %>%
+  group_by(voted, PARTY_CODE) %>%
+  tally()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
