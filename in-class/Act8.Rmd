@@ -1,0 +1,88 @@
+---
+title: "HW7Work"
+author: "Canyon"
+date: "4/9/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(gutenbergr)
+
+library(tidyverse)
+library(babynames)
+
+```
+
+```{r}
+gutenberg_works(author == "Shakespeare, William")
+gutenberg_works(title == "Macbeth")
+macbeth <- gutenberg_download(1533)
+macbeth <- macbeth %>%
+  slice(271:3171)
+```
+Macbeth Activity
+```{r}
+grep("MAC\\w{4}\\.", macbeth$text, value = T) %>%
+  head(10)
+
+grep("[is]", macbeth$text, value = T) %>%
+  head(10)
+```
+
+Names Activity
+```{r}
+
+vol_name <- data.frame(grep("[aeiouy]$", babynames$name, value = T)) %>%
+  distinct()
+names(vol_name) <- c("name") 
+
+joe_name <- data.frame(grep("(jo$)|(Joe$)|(joe$)" ,babynames$name, value = T)) %>% distinct()
+names(joe_name) <- c("name") 
+
+
+babyname_func <- function(names_set, sex_input) {
+  right_join(babynames, names_set) %>% 
+  filter(sex == sex_input) %>% 
+  distinct() %>%
+  group_by(name) %>%
+  summarise(total = sum(n)) %>%
+  arrange(desc(total)) %>%
+  head(10)
+}
+
+babyname_func(vol_name, "M")
+babyname_func(joe_name, "M")
+babyname_func(joe_name, "F")
+
+con_names <- data.frame(grep("[^AEIOUYaeiouy]{5}", babynames$name, value = T)) %>%
+  distinct() %>%
+  head()
+```
+
+Hamlet:
+
+The play is 3966 lines long.
+```{r}
+gutenberg_works(author == "Shakespeare, William")
+gutenberg_works(title == "Hamlet")
+Hamlet <- gutenberg_download(2265) %>%
+  slice(93:5013) %>%
+  filter(text != "")
+
+Hamlet_char <- grepl("Ham\\.", Hamlet$text)
+Horatio <- grepl("Hor\\.", Hamlet$text)
+Laertes <- grepl("Laer\\.", Hamlet$text)
+Ophelia <- grepl("Ophe\\.", Hamlet$text)
+
+speaker_freq <- data.frame(Hamlet_char, Horatio, Laertes, Ophelia) %>%
+  mutate(line = 1:3966) %>%
+  gather(key = "character", value = "speak", -line) %>%
+  mutate(speak = as.numeric(speak))
+
+ggplot(speaker_freq, aes(x = line, y = speak)) +
+  geom_smooth(aes(col = character), method = "loess", se = FALSE, span = .4) +
+   xlab("Line Number") + ylab("Proportion of Speeches") 
+
+
+```
